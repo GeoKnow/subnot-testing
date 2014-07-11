@@ -5,6 +5,12 @@
 *.swp
 *.out
 
+## eclipse
+.project
+.metadata
+.classpath
+.settings/
+
 ## maven
 target/
 

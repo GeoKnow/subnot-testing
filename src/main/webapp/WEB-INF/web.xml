@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+    version="2.4">
+
+  <display-name>SubNot Testing</display-name>
+  
+   <context-param> 
+    <description>Destination endpoint</description> 
+    <param-name>destination-endpoint</param-name> 
+    <param-value>http://10.0.0.82:8890/sparql</param-value> 
+  </context-param>
+   <context-param> 
+    <description>Proxy endpoint</description> 
+    <param-name>proxy-endpoint</param-name> 
+    <param-value>http://localhost:8080/subnot-testing/sparql</param-value> 
+  </context-param>
+   <context-param> 
+    <description>Rsine URL</description> 
+    <param-name>rsine</param-name> 
+    <param-value>http://localhost:2221</param-value> 
+  </context-param>
+        
+   <servlet>
+     <servlet-name>sparql</servlet-name>
+     <servlet-class>eu.geoknow.subnottesting.SparqlProxyServlet</servlet-class>
+  </servlet>
+
+    <servlet-mapping>
+     <servlet-name>sparql</servlet-name>
+     <url-pattern>/sparql</url-pattern>
+  </servlet-mapping>
+
+   <servlet>
+     <servlet-name>testing</servlet-name>
+     <servlet-class>eu.geoknow.subnottesting.SubNotTestingServlet</servlet-class>
+  </servlet>
+
+    <servlet-mapping>
+     <servlet-name>testing</servlet-name>
+     <url-pattern>/*</url-pattern>
+  </servlet-mapping>
+
+
+  
+  
+</web-app>

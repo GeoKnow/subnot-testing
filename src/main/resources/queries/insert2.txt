@@ -1,0 +1,4 @@
+INSERT INTO <test>  {
+            <#book1> <http://purl.org/dc/elements/1.1/title> "Fundamentals of Compiler Design"
+            <#book1> <http://purl.org/dc/elements/1.1/date> "1996-01-01T00:00:00-02:00"^^xsd:dateTime 
+            <#book1> a <http://purl.org/dc/dcmitype/PhysicalObject> } 

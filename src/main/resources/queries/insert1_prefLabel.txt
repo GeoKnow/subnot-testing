@@ -1,0 +1,8 @@
+prefix skos:	<http://www.w3.org/2004/02/skos/core#>
+
+insert into <test> {
+<http://dbpedia.org/resource/Category:%C3%87aykur_Rizespor_footballers>	skos:prefLabel	"\u00C7aykur Rizespor footballers"@en .
+<http://dbpedia.org/resource/Category:%C3%89cole_pratique_des_hautes_%C3%A9tudes_alumni>	skos:prefLabel	"\u00C9cole pratique des hautes \u00E9tudes alumni"@en .
+<http://dbpedia.org/resource/Category:%C3%89lectricit%C3%A9_de_France>	skos:prefLabel	"\u00C9lectricit\u00E9 de France"@en .
+
+}
