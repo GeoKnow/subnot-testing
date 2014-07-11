@@ -8,7 +8,7 @@ This project aims to set up a testing environment to compare subscription and no
 ### The subscription and notification services
 
 The subscription and notification services considered are those that allow to the user to subscribe for notificatios on specific changes to triples in an RDF Store. 
-
+  
 ### Metrics
 
 We are interested in performance test considering the following metrics:
@@ -17,10 +17,30 @@ We are interested in performance test considering the following metrics:
 * **Notification response time**: We want to know how quick the Service will notify the user of a given subscription.
 
 
-## Components
+### Testing System Components
 
-This testing system considers the following components
+This testing system considers the following components:
 
-* RDF Store
-* Subscription and Notification Service
-* Sparql Query Generator
+* RDF Store (the subject of changes)
+* Subscription and Notification Service, may be composed of:
+  * Server component: to register subscriptions and send notification
+  * RDF Store component : specific implementation of the RDF Store to track its changes
+* Sparql Query Generator : This component will generate activity for the RDF store by sending SPARQL queries
+* Testing System Manager: (this project itself) will orchestrate activitiy between above mentioned components and perform the corresponding measurements.
+
+### Testing System Manager  
+
+* SubscriptiionNotificationService Interface
+* SPARQLQuery Proxy
+* SparqlSimulator Interface
+* Manager
+
+
+## Install
+
+To generatr the war file:
+
+	mvn package
+
+
+

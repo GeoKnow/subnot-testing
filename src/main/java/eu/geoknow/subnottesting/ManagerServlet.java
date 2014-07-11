@@ -12,21 +12,22 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import eu.geoknow.subnottesting.metrics.Queries;
 import eu.geoknow.subnottesting.services.RsineService;
 import eu.geoknow.subnottesting.services.SubscriptiionNotificationService;
-import eu.geoknow.subnottesting.sparqlclientssimulators.SampleSparqlClientSimulator;
+import eu.geoknow.subnottesting.sparqlclientssimulators.SimpleSparqlSimulator;
 
-public class SubNotTestingServlet extends HttpServlet {
+public class ManagerServlet extends HttpServlet {
 
-  private static final Logger LOGGER = Logger.getLogger(SubNotTestingServlet.class);
-  private static SampleSparqlClientSimulator data_sim;
+  private static final Logger LOGGER = Logger.getLogger(ManagerServlet.class);
+  private static SimpleSparqlSimulator data_sim;
   private static SubscriptiionNotificationService sub_not;
 
   public void init(final ServletConfig config) throws ServletException {
     super.init(config);
 
     try {
-      data_sim = new SampleSparqlClientSimulator(config.getServletContext().getInitParameter(
+      data_sim = new SimpleSparqlSimulator(config.getServletContext().getInitParameter(
           "proxy-endpoint"));
 
       sub_not = new RsineService();

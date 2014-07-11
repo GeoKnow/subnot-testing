@@ -1,6 +1,6 @@
 package eu.geoknow.subnottesting.sparqlclientssimulators;
 
-public class SupplyChainSimulator implements ISparqlClientSimulator {
+public class SupplyChainSimulator implements SparqlSimulator {
 
   private String endpoint;
 

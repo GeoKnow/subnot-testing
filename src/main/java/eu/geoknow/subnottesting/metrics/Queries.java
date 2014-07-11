@@ -1,4 +1,4 @@
-package eu.geoknow.subnottesting;
+package eu.geoknow.subnottesting.metrics;
 
 import java.util.ArrayList;
 import java.util.List;

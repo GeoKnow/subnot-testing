@@ -19,6 +19,9 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.log4j.Logger;
 
+import eu.geoknow.subnottesting.metrics.Queries;
+import eu.geoknow.subnottesting.metrics.Query;
+
 public class SparqlProxyServlet extends HttpServlet {
 
   /**

@@ -1,4 +1,4 @@
-package eu.geoknow.subnottesting;
+package eu.geoknow.subnottesting.metrics;
 
 /**
  * This class is to measure the query response time

@@ -18,17 +18,17 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
-public class SampleSparqlClientSimulator implements ISparqlClientSimulator {
+public class SimpleSparqlSimulator implements SparqlSimulator {
 
-  private static final Logger LOGGER = Logger.getLogger(SampleSparqlClientSimulator.class);
+  private static final Logger LOGGER = Logger.getLogger(SimpleSparqlSimulator.class);
 
   private URL endpoint;
   private boolean exit;
   private List<File> sparql_queries;
 
-  private ISparqlClientSimulator instance;
+  private SparqlSimulator instance;
 
-  public SampleSparqlClientSimulator(String endpoint) throws MalformedURLException {
+  public SimpleSparqlSimulator(String endpoint) throws MalformedURLException {
     // read the list of files of queries
     sparql_queries = new ArrayList<File>();
 

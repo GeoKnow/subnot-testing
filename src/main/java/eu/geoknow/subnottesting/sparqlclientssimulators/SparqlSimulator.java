@@ -4,7 +4,7 @@ import java.io.IOException;
 
 import org.apache.commons.httpclient.HttpException;
 
-public interface ISparqlClientSimulator {
+public interface SparqlSimulator {
 
   public void run() throws HttpException, IOException;
 
