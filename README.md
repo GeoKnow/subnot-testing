@@ -38,7 +38,7 @@ This testing system considers the following components:
 
 ## Install
 
-To generatr the war file:
+To generate the war file:
 
 	mvn package
 

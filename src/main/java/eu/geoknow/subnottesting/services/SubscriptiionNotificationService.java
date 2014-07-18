@@ -6,7 +6,11 @@ public interface SubscriptiionNotificationService {
 
   public void setServiceUrl(String url) throws MalformedURLException;
 
-  public void registerSubscriptions();
+  /**
+   * Performs subscriptions to the system.
+   * 
+   * @return the number of registered subscriptions
+   */
+  public int registerSubscriptions(String dir);
 
-  public void notificationListener();
 }

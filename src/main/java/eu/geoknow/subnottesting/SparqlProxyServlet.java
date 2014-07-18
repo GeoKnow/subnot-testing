@@ -22,23 +22,37 @@ import org.apache.log4j.Logger;
 import eu.geoknow.subnottesting.metrics.Queries;
 import eu.geoknow.subnottesting.metrics.Query;
 
+/**
+ * This class is a Proxy to measure query response time and to analyze what
+ * subscriptions can be affected by a given query
+ * 
+ * @author alejandragarciarojas
+ * 
+ */
+
 public class SparqlProxyServlet extends HttpServlet {
 
   /**
    * 
    */
-  private static final long serialVersionUID = -7645413767912770880L;
+  private static final long serialVersionUID = 1L;
 
   private static final Logger LOGGER = Logger.getLogger(SparqlProxyServlet.class);
 
   private URL url;
   private HttpClient proxy;
 
+  /**
+   * The Servlet is initialized with the destination endpoint provided in the
+   * web.xml file
+   */
   public void init(final ServletConfig config) throws ServletException {
 
     super.init(config);
 
     String destUrl = config.getServletContext().getInitParameter("destination-endpoint");
+
+    LOGGER.info("destination-endpoint: " + destUrl);
 
     try {
       url = new URL(destUrl);
@@ -61,29 +75,31 @@ public class SparqlProxyServlet extends HttpServlet {
     for (String name : requestParameters.keySet()) {
       for (String value : requestParameters.get(name)) {
         if ("query".equals(name))
-          query = addQuery(value);
+          query = new Query(value);
 
-        // TODO get the Query parameter
+        // TODO determine what subscriptions can be affected by this query
+        // query.subscriptionsImpact
         proxyMethod.addParameter(name, value);
       }
     }
-    LOGGER.info("Executing " + proxyMethod.getPath());
+
+    LOGGER.debug(query.getQuery());
 
     if (query != null)
       query.setStartTime(System.currentTimeMillis());
 
     proxy.executeMethod(proxyMethod);
 
-    if (query != null)
+    if (query != null) {
       query.setEndTime(System.currentTimeMillis());
+      Queries.getInstance().addQuery(query);
+    }
+
+    LOGGER.debug("duration:" + (query.getEndTime() - query.getStartTime()));
 
     write(proxyMethod.getResponseBodyAsStream(), resp.getOutputStream());
 
     proxyMethod.releaseConnection();
-  }
-
-  private Query addQuery(String value) {
-    return Queries.getInstance().addQuery(value);
   }
 
   private void write(final InputStream inputStream, final OutputStream outputStream)
@@ -115,7 +131,7 @@ public class SparqlProxyServlet extends HttpServlet {
         }
 
         if ("query".equals(name))
-          query = addQuery(value);
+          query = new Query(value);
 
         name = URLEncoder.encode(name, "UTF-8");
         value = URLEncoder.encode(value, "UTF-8");
@@ -127,15 +143,20 @@ public class SparqlProxyServlet extends HttpServlet {
     String uri = String.format("%s%s", url.toString(), params.toString());
     GetMethod proxyMethod = new GetMethod(uri);
 
-    LOGGER.info("Executing " + proxyMethod.getPath());
+    LOGGER.debug(query.getQuery());
 
     if (query != null)
       query.setStartTime(System.currentTimeMillis());
 
     proxy.executeMethod(proxyMethod);
 
-    if (query != null)
+    if (query != null) {
       query.setEndTime(System.currentTimeMillis());
+      Queries.getInstance().addQuery(query);
+    }
+
+    LOGGER.debug("duration:" + (query.getEndTime() - query.getStartTime()) + " == "
+        + query.getRunTime());
 
     write(proxyMethod.getResponseBodyAsStream(), resp.getOutputStream());
 

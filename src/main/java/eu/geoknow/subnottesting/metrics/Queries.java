@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A class for having collections of queries of a given test and compute the average query response
- * time
+ * A class for having collections of queries of a given test and compute the
+ * average query response time
  * 
  * @author alejandragarciarojas
  * 
@@ -33,18 +33,38 @@ public class Queries {
 
   public long getQueryRunTimeAverage() {
     if (list.isEmpty())
-      return 0;
-    long sum = 0l;
+      return (long) 0;
+    long sum = 0;
     for (int index = 0; index < list.size(); index++) {
       sum += list.get(index).getRunTime();
     }
-    return sum / list.size();
+    return sum / (long) list.size();
   }
 
-  public Query addQuery(String query) {
-    Query q = new Query(query);
-    list.add(q);
-    return q;
+  public void addQuery(Query query) {
+    list.add(query);
+  }
+
+  public long getQueryMaxDuration() {
+    long max = 0;
+
+    for (int index = 0; index < list.size(); index++) {
+      if (list.get(index).getRunTime() > max)
+        max = list.get(index).getRunTime();
+    }
+
+    return max;
+  }
+
+  public long getQueryMinDuration() {
+
+    long min = Long.MAX_VALUE;
+
+    for (int index = 0; index < list.size(); index++) {
+      if (list.get(index).getRunTime() < min)
+        min = list.get(index).getRunTime();
+    }
+    return min;
   }
 
 }

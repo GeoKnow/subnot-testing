@@ -1,0 +1,14 @@
+prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> 
+prefix skos: <http://www.w3.org/2004/02/skos/core#> 
+insert into <test> {
+<http://dbpedia.org/resource/Category:%C4%8Cesk%C3%BD_T%C4%9B%C5%A1%C3%ADn> rdf:type  skos:Concept ;
+  skos:prefLabel  "\u010Cesk\u00FD T\u011B\u0161\u00EDn"@en .
+<http://dbpedia.org/resource/Category:%C5%81%C4%99czna_County_geography_stubs>  rdf:type  skos:Concept ;
+  skos:prefLabel  "\u0141\u0119czna County geography stubs"@en .
+<http://dbpedia.org/resource/Category:%C5%81a%C5%84cut_County_geography_stubs>  rdf:type  skos:Concept ;
+  skos:prefLabel  "\u0141a\u0144cut County geography stubs"@en .
+<http://dbpedia.org/resource/Category:%C5%81om%C5%BCa_County_geography_stubs> rdf:type  skos:Concept ;
+  skos:prefLabel  "\u0141om\u017Ca County geography stubs"@en .
+<http://dbpedia.org/resource/Category:%C5%81owicz_County_geography_stubs> rdf:type  skos:Concept ;
+  skos:prefLabel  "\u0141owicz County geography stubs"@en .
+  }

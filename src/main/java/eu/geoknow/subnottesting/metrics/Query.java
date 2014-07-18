@@ -1,7 +1,10 @@
 package eu.geoknow.subnottesting.metrics;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * This class is to measure the query response time
+ * This class is to measure the query response time and the notification time
  * 
  * @author alejandragarciarojas
  * 
@@ -12,8 +15,15 @@ public class Query {
   private long end_time;
   private String sparql_query;
 
+  /**
+   * A list of subscriptions that are impacted by this query
+   * 
+   */
+  public List<String> subscriptionsImpact;
+
   public Query(String sparql_query) {
     this.sparql_query = sparql_query;
+    subscriptionsImpact = new ArrayList<String>();
   }
 
   public String getQuery() {

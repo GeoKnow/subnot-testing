@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
@@ -18,29 +17,36 @@ import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.commons.io.IOUtils;
 import org.apache.log4j.Logger;
 
+/***
+ * This class reads form resources/queries all txt files and post them to the
+ * endpoint
+ * 
+ * @author alejandragarciarojas
+ * 
+ */
+
 public class SimpleSparqlSimulator implements SparqlSimulator {
 
   private static final Logger LOGGER = Logger.getLogger(SimpleSparqlSimulator.class);
 
   private URL endpoint;
-  private boolean exit;
   private List<File> sparql_queries;
-
-  private SparqlSimulator instance;
 
   public SimpleSparqlSimulator(String endpoint) throws MalformedURLException {
     // read the list of files of queries
     sparql_queries = new ArrayList<File>();
 
-    URL url = getClass().getResource("/queries");
+    URL url = getClass().getResource("/");
 
-    LOGGER.info("Reading queries txt files from resources...");
-    File dir = new File(url.getPath());
+    LOGGER.info("Reading queries (txt files) from " + url.getPath()
+        + SimpleSparqlSimulator.class.getName());
+    File dir = new File(url.getPath() + SimpleSparqlSimulator.class.getName());
 
     if (dir.isDirectory()) {
       for (final File fileEntry : dir.listFiles()) {
         if (fileEntry.isFile())
-          sparql_queries.add(fileEntry);
+          if (fileEntry.getName().endsWith(".txt"))
+            sparql_queries.add(fileEntry);
       }
 
     } else
@@ -54,43 +60,37 @@ public class SimpleSparqlSimulator implements SparqlSimulator {
     HttpClient client = new HttpClient();
     client.getHostConfiguration().setHost(endpoint.getHost());
 
-    exit = false;
     for (int index = 0; index < sparql_queries.size(); index++) {
-      try {
 
-        FileInputStream fis = new FileInputStream(sparql_queries.get(index));
-        String query = IOUtils.toString(fis, "UTF-8");
+      LOGGER.info("Posting " + sparql_queries.get(index).getName());
 
-        String params = "?query=" + URLEncoder.encode(query, "UTF-8");
-        params += "&format=" + URLEncoder.encode("application/sparql-results+json", "UTF-8");
+      FileInputStream fis = new FileInputStream(sparql_queries.get(index));
+      String query = IOUtils.toString(fis, "UTF-8");
 
-        String uri = endpoint.toString() + params;
+      String params = "?query=" + URLEncoder.encode(query, "UTF-8");
+      params += "&format=" + URLEncoder.encode("application/sparql-results+json", "UTF-8");
 
-        LOGGER.info("MethodGet :" + uri);
+      String uri = endpoint.toString() + params;
 
-        GetMethod method = new GetMethod(uri);
-        client.executeMethod(method);
+      LOGGER.debug("MethodGet :" + uri);
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(method
-            .getResponseBodyAsStream()));
-        String readLine;
-        while (((readLine = br.readLine()) != null)) {
-          LOGGER.info("  " + readLine);
-        }
+      GetMethod method = new GetMethod(uri);
+      client.executeMethod(method);
 
-        method.releaseConnection();
-
-      } catch (UnsupportedEncodingException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+      BufferedReader br = new BufferedReader(
+          new InputStreamReader(method.getResponseBodyAsStream()));
+      String readLine;
+      LOGGER.info("Response status:  " + method.getStatusCode());
+      while (((readLine = br.readLine()) != null)) {
+        LOGGER.debug("  " + readLine);
       }
+      method.releaseConnection();
 
-      // if (exit) break;
     }
   }
 
   public void stop() {
-    exit = true;
+
   }
 
 }

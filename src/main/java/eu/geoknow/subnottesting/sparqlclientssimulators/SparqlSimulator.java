@@ -8,5 +8,5 @@ public interface SparqlSimulator {
 
   public void run() throws HttpException, IOException;
 
-  public void stop();
+  public void stop() throws HttpException, IOException;
 }

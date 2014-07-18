@@ -36,26 +36,25 @@ public class RsineService implements SubscriptiionNotificationService {
     LOGGER.info("Rsine service at " + url_p);
   }
 
-  public void notificationListener() {
-    // TODO Auto-generated method stub
-
-  }
-
   /**
-   * This function will registered subscriptions that are in the resources directory
+   * This function will registered subscriptions that are in the resources
+   * directory
+   * 
+   * @return number of subscriptions registered
    */
-  public void registerSubscriptions() {
+  public int registerSubscriptions(String directory) {
 
-    URL url = getClass().getResource("/subscriptions");
+    URL url = getClass().getResource("/");
 
-    LOGGER.info("Registering subscriptions...");
-    File dir = new File(url.getPath());
+    LOGGER.info("Registering subscriptions (ttl|rdf|n3 files) from resources/" + directory);
+    File dir = new File(url.getPath() + directory);
     int n_subs = 0;
     if (dir.isDirectory()) {
       n_subs = subscribeRdfFiles(dir);
       LOGGER.info(n_subs + " registered subscriptions");
     } else
       LOGGER.error("Not a directory");
+    return n_subs;
 
   }
 
@@ -78,10 +77,17 @@ public class RsineService implements SubscriptiionNotificationService {
             PostMethod subscription = new PostMethod(url.toString() + "/register");
             subscription.setRequestEntity(new StringRequestEntity(content, content_type, "UTF-8"));
 
-            LOGGER.info("Subscribing :" + subscription.getPath());
             client.executeMethod(subscription);
+
+            if (subscription.getStatusCode() == 201) {
+              LOGGER.error(subscription.getStatusCode() + " :" + subscription.getStatusText() + " "
+                  + subscription.getPath());
+            } else
+              LOGGER.error(subscription.getStatusCode() + " :" + subscription.getStatusText() + " "
+                  + subscription.getPath());
+
             subscription.releaseConnection();
-            count++;
+
           } catch (IOException e) {
             e.printStackTrace();
           }

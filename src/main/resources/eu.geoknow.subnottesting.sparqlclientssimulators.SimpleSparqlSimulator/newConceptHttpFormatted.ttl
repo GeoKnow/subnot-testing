@@ -1,0 +1,33 @@
+@prefix spin: <http://spinrdf.org/sp/> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix rsine: <http://lod2.eu/rsine/> .
+@prefix http: <http://www.w3.org/2011/http#> .
+
+<http://example.org/newConceptFormatted> a rsine:Subscription;
+    rsine:query [
+        spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
+            PREFIX spin:<http://spinrdf.org/sp/>
+            PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+            PREFIX skos:<http://www.w3.org/2004/02/skos/core#>
+            SELECT * WHERE {
+                ?cs a cs:ChangeSet .
+                ?cs cs:createdDate ?csdate .
+                ?cs cs:addition ?addition .
+                ?addition rdf:subject ?concept .
+                ?addition rdf:predicate rdf:type .
+                ?addition rdf:object skos:Concept
+            }";
+        ];
+    
+    rsine:notifier [
+        a rsine:httpNotifier ;
+        http:methodName "POST";
+        http:absoluteURI <http://localhost:8080/subnot-testing/notify>;
+        rsine:subscription <http://example.org/newConceptFormatted> 
+    ];
+        
+    rsine:formatter [
+         a rsine:vtlFormatter;
+         rsine:message "There is a new concept '$bindingSet.getValue('concept')'";
+    ] .
+    
