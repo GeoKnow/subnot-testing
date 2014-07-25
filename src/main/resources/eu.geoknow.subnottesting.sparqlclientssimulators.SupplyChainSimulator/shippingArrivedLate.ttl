@@ -4,8 +4,8 @@
 @prefix http: <http://www.w3.org/2011/http#> .
 @prefix dcterms: <http://purl.org/dc/terms/>.
 
-<http://example.org/new_supplier> a rsine:Subscription;
-   dcterms:description "new supplier";
+<http://example.org/shipping_late> a rsine:Subscription;
+   dcterms:description "One or more shippings arrived late";
    rsine:query [
         spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
             PREFIX spin:<http://spinrdf.org/sp/>
@@ -18,13 +18,22 @@
                 ?cs cs:addition ?addition .
                 ?addition rdf:subject ?concept .
                 ?addition rdf:predicate rdf:type .
-                ?addition rdf:object sc:Supplier
+                ?addition rdf:object sc:Shipping
             }";
+             rsine:condition [
+                spin:text "PREFIX sc: <http://www.xybermotive.com/ontology/> 
+                           ASK {
+                              ?concept sc:order ?order .
+                              ?order sc:dueDate ?dueDate 
+                              ?concept sc:date ?actualDate .
+                              FILTER(?actualDate > ?dueDate);
+                           }";
+                rsine:expect "true"^^xsd:boolean;
+             ];
         ];
-    
+        
     rsine:notifier [
         a rsine:httpNotifier ;
         http:methodName "POST";
-        http:absoluteURI <http://localhost:8080/subnot-testing/notify>;
-        rsine:subscription <http://example.org/new_supplier> 
+        http:absoluteURI <http://localhost:8080/subnot-testing/notify> 
     ].

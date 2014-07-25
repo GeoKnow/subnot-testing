@@ -3,6 +3,7 @@ package eu.geoknow.subnottesting.sparqlclientssimulators;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -55,7 +56,7 @@ public class SimpleSparqlSimulator implements SparqlSimulator {
     this.endpoint = new URL(endpoint);
   }
 
-  public void run() throws HttpException, IOException {
+  public void run() {
 
     HttpClient client = new HttpClient();
     client.getHostConfiguration().setHost(endpoint.getHost());
@@ -64,27 +65,38 @@ public class SimpleSparqlSimulator implements SparqlSimulator {
 
       LOGGER.info("Posting " + sparql_queries.get(index).getName());
 
-      FileInputStream fis = new FileInputStream(sparql_queries.get(index));
-      String query = IOUtils.toString(fis, "UTF-8");
+      FileInputStream fis;
+      try {
+        fis = new FileInputStream(sparql_queries.get(index));
 
-      String params = "?query=" + URLEncoder.encode(query, "UTF-8");
-      params += "&format=" + URLEncoder.encode("application/sparql-results+json", "UTF-8");
+        String query = IOUtils.toString(fis, "UTF-8");
 
-      String uri = endpoint.toString() + params;
+        String params = "?query=" + URLEncoder.encode(query, "UTF-8");
+        params += "&format=" + URLEncoder.encode("application/sparql-results+json", "UTF-8");
 
-      LOGGER.debug("MethodGet :" + uri);
+        String uri = endpoint.toString() + params;
 
-      GetMethod method = new GetMethod(uri);
-      client.executeMethod(method);
+        LOGGER.debug("MethodGet :" + uri);
 
-      BufferedReader br = new BufferedReader(
-          new InputStreamReader(method.getResponseBodyAsStream()));
-      String readLine;
-      LOGGER.info("Response status:  " + method.getStatusCode());
-      while (((readLine = br.readLine()) != null)) {
-        LOGGER.debug("  " + readLine);
+        GetMethod method = new GetMethod(uri);
+        client.executeMethod(method);
+
+        BufferedReader br = new BufferedReader(new InputStreamReader(method
+            .getResponseBodyAsStream()));
+        String readLine;
+        LOGGER.info("Response status:  " + method.getStatusCode());
+        while (((readLine = br.readLine()) != null)) {
+          LOGGER.debug("  " + readLine);
+        }
+        method.releaseConnection();
+
+      } catch (FileNotFoundException e) {
+        LOGGER.equals(e.getMessage());
+      } catch (HttpException e) {
+        LOGGER.equals(e.getMessage());
+      } catch (IOException e) {
+        LOGGER.equals(e.getMessage());
       }
-      method.releaseConnection();
 
     }
   }

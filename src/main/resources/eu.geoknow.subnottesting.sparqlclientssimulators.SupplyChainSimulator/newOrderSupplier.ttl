@@ -4,8 +4,8 @@
 @prefix http: <http://www.w3.org/2011/http#> .
 @prefix dcterms: <http://purl.org/dc/terms/>.
 
-<http://example.org/new_product> a rsine:Subscription;
-   dcterms:description "new product";
+<http://example.org/new_order/FairPhone-ccd657dd-722f-4d86-87c9-65b1de9317e3> a rsine:Subscription;
+   dcterms:description "new order from FairPhone-ccd657dd-722f-4d86-87c9-65b1de9317e3";
    rsine:query [
         spin:text "PREFIX cs:<http://purl.org/vocab/changeset/schema#>
             PREFIX spin:<http://spinrdf.org/sp/>
@@ -18,13 +18,20 @@
                 ?cs cs:addition ?addition .
                 ?addition rdf:subject ?concept .
                 ?addition rdf:predicate rdf:type .
-                ?addition rdf:object sc:Product
+                ?addition rdf:object sc:Order
             }";
-        ];
+         rsine:condition [
+                spin:text "PREFIX sc: <http://www.xybermotive.com/ontology/> 
+                           ASK {
+                              ?concept sc:connection ?connection . 
+                              ?connection sc:supplier <http://www.xybermotive.com/supplier/FairPhone-ccd657dd-722f-4d86-87c9-65b1de9317e3>
+                           }";
+                rsine:expect "true"^^xsd:boolean;
+         ];
+    ];
     
     rsine:notifier [
         a rsine:httpNotifier ;
         http:methodName "POST";
-        http:absoluteURI <http://localhost:8080/subnot-testing/notify>;
-        rsine:subscription <http://example.org/new_product> 
+        http:absoluteURI <http://localhost:8080/subnot-testing/notify> 
     ].

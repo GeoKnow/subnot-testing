@@ -83,19 +83,17 @@ public class SparqlProxyServlet extends HttpServlet {
       }
     }
 
-    LOGGER.debug(query.getQuery());
-
-    if (query != null)
+    if (query != null) {
       query.setStartTime(System.currentTimeMillis());
-
+      LOGGER.debug(query.getQuery());
+    }
     proxy.executeMethod(proxyMethod);
 
     if (query != null) {
       query.setEndTime(System.currentTimeMillis());
       Queries.getInstance().addQuery(query);
+      LOGGER.debug("duration:" + (query.getEndTime() - query.getStartTime()));
     }
-
-    LOGGER.debug("duration:" + (query.getEndTime() - query.getStartTime()));
 
     write(proxyMethod.getResponseBodyAsStream(), resp.getOutputStream());
 
@@ -143,20 +141,18 @@ public class SparqlProxyServlet extends HttpServlet {
     String uri = String.format("%s%s", url.toString(), params.toString());
     GetMethod proxyMethod = new GetMethod(uri);
 
-    LOGGER.debug(query.getQuery());
-
-    if (query != null)
+    if (query != null) {
+      LOGGER.debug(query.getQuery());
       query.setStartTime(System.currentTimeMillis());
-
+    }
     proxy.executeMethod(proxyMethod);
 
     if (query != null) {
       query.setEndTime(System.currentTimeMillis());
       Queries.getInstance().addQuery(query);
+      LOGGER.debug("duration:" + (query.getEndTime() - query.getStartTime()) + " == "
+          + query.getRunTime());
     }
-
-    LOGGER.debug("duration:" + (query.getEndTime() - query.getStartTime()) + " == "
-        + query.getRunTime());
 
     write(proxyMethod.getResponseBodyAsStream(), resp.getOutputStream());
 

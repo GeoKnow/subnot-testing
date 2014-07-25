@@ -34,6 +34,7 @@ public class ManagerServlet extends HttpServlet {
   private static SubscriptiionNotificationService sub_not;
   private long start = 0, end = 0;
   private int n_subscriptions = 0;
+  private boolean running = false;
 
   public void init(final ServletConfig config) throws ServletException {
     super.init(config);
@@ -46,6 +47,7 @@ public class ManagerServlet extends HttpServlet {
       data_sim = new SupplyChainSimulator(config.getServletContext().getInitParameter("scd"));
       sub_not = new RsineService();
       sub_not.setServiceUrl(config.getServletContext().getInitParameter("rsine"));
+
     } catch (MalformedURLException e) {
       // TODO Auto-generated catch block
       e.printStackTrace();
@@ -61,22 +63,28 @@ public class ManagerServlet extends HttpServlet {
     DateFormat fdate = new SimpleDateFormat("EEE, d MMM yyyy HH:mm:ss Z");
 
     String action = req.getParameter("action");
-    if ("run".equals(action)) {
+
+    if (action == null)
+      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "action parameter is missing");
+
+    if ("run".equals(action) && !running) {
+      running = true;
       // clean static variables
       Queries.getInstance().getQueries().clear();
       ChangeSetNotifications.getInstance().getChangeSetNotifications().clear();
       // perform subscriptions
       n_subscriptions = sub_not.registerSubscriptions(data_sim.getClass().getName());
       output.write("\nRegistered subscriptions: " + n_subscriptions);
-      // get timestmp
+      // get time stamp
       start = System.currentTimeMillis();
       // start simulation
       data_sim.run();
       output.write("\nSimulation started: " + fdate.format(new Date(start)));
       resp.setStatus(HttpServletResponse.SC_OK);
 
-    } else if ("stop".equals(action)) {
-      // stop simulation and get timestamp
+    } else if ("stop".equals(action) && running) {
+      running = false;
+      // stop simulation and get time stamp
       data_sim.stop();
       end = System.currentTimeMillis();
       output.write("\nSimulation started: " + fdate.format(new Date(start)));
@@ -105,8 +113,7 @@ public class ManagerServlet extends HttpServlet {
 
       resp.setStatus(HttpServletResponse.SC_OK);
 
-    } else
-      resp.sendError(HttpServletResponse.SC_BAD_REQUEST, "action parameter is missing");
+    }
 
     resp.flushBuffer();
   }

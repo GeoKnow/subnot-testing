@@ -82,6 +82,7 @@ public class RsineService implements SubscriptiionNotificationService {
             if (subscription.getStatusCode() == 201) {
               LOGGER.error(subscription.getStatusCode() + " :" + subscription.getStatusText() + " "
                   + subscription.getPath());
+              count++;
             } else
               LOGGER.error(subscription.getStatusCode() + " :" + subscription.getStatusText() + " "
                   + subscription.getPath());

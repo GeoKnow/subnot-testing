@@ -51,59 +51,51 @@ public class NotifyServlet extends HttpServlet {
     ChangeSetNotifications notifications = ChangeSetNotifications.getInstance();
 
     long notificationTimeStamp = System.currentTimeMillis();
-    String subscription = "";
-    String messages = "";
 
     for (String name : requestParameters.keySet()) {
       for (String value : requestParameters.get(name)) {
 
-        if ("subscription".equals(name)) {
-          subscription = value;
-          LOGGER.info("Notification for " + value + " received");
-        } else if ("messages".equals(name)) {
-          messages = value;
-        } else
-          LOGGER.debug(name + " - " + value);
-      }
-    }
+        if ("messages".equals(name)) {
 
-    if (!messages.isEmpty()) {
-      Pattern p = Pattern.compile("\\[(.*?)\\]");
-      Matcher m = p.matcher(messages);
-      int changes_count = 0;
-      while (m.find()) {
-        String[] bindings = m.group(1).split(";");
-        ChangeSetNotification csnotification = notifications.addChangeSetNotification();
-        csnotification.setSubscription(subscription);
-        csnotification.setNotificationTimeStamp(notificationTimeStamp);
-        changes_count++;
-        for (int i = 0; i < bindings.length; i++) {
-          String binding = bindings[i];
-          String[] kv = binding.split("=");
-          // it is required a property called csdate that contains the date
-          // of the change
-          if ("csdate".equals(kv[0])) {
-            Pattern pdate = Pattern.compile("\"(.*?)\"");
-            Matcher mdate = pdate.matcher(kv[1]);
-            if (mdate.find()) {
-              LOGGER.debug("csdate = " + mdate.group(1));
-              try {
-                XMLGregorianCalendar date = DatatypeFactory.newInstance().newXMLGregorianCalendar(
-                    mdate.group(1));
-                csnotification.setChangeSetTimeStamp(date.toGregorianCalendar().getTimeInMillis());
+          Pattern p = Pattern.compile("\\[(.*?)\\]");
+          Matcher m = p.matcher(value);
+          int changes_count = 0;
+          while (m.find()) {
+            String[] bindings = m.group(1).split(";");
+            ChangeSetNotification csnotification = notifications.addChangeSetNotification();
 
-              } catch (DatatypeConfigurationException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-              }
+            csnotification.setNotificationTimeStamp(notificationTimeStamp);
+            changes_count++;
+            for (int i = 0; i < bindings.length; i++) {
+              String binding = bindings[i];
+              String[] kv = binding.split("=");
+              // it is required a property called csdate that contains the date
+              // of the change
+              if ("csdate".equals(kv[0])) {
+                Pattern pdate = Pattern.compile("\"(.*?)\"");
+                Matcher mdate = pdate.matcher(kv[1]);
+                if (mdate.find()) {
+                  LOGGER.debug("csdate = " + mdate.group(1));
+                  try {
+                    XMLGregorianCalendar date = DatatypeFactory.newInstance()
+                        .newXMLGregorianCalendar(mdate.group(1));
+                    csnotification.setChangeSetTimeStamp(date.toGregorianCalendar()
+                        .getTimeInMillis());
+
+                  } catch (DatatypeConfigurationException e) {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                  }
+                }
+
+              } else
+                LOGGER.debug(kv[0] + " - " + kv[1]);
             }
 
-          } else
-            LOGGER.debug(kv[0] + " - " + kv[1]);
+          }
+          LOGGER.info(changes_count + " changes");
         }
-
       }
-      LOGGER.info(changes_count + " changes");
     }
     resp.setStatus(HttpServletResponse.SC_OK);
   }

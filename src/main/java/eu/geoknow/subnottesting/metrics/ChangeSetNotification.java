@@ -2,19 +2,9 @@ package eu.geoknow.subnottesting.metrics;
 
 public class ChangeSetNotification {
 
-  private String subscription;
-
   private long notificationTimeStamp;
   private long changeSetTimeStamp;
   private String changSet;
-
-  public String getSubscription() {
-    return subscription;
-  }
-
-  public void setSubscription(String subscription) {
-    this.subscription = subscription;
-  }
 
   public long getNotificationTimeStamp() {
     return notificationTimeStamp;

@@ -10,10 +10,10 @@
    <context-param> 
     <description>Destination endpoint</description> 
     <param-name>destination-endpoint</param-name> 
-    <param-value>http://10.0.0.63:8890/sparql</param-value> 
+    <param-value>http://10.0.0.75:8890/sparql</param-value> 
   </context-param>
    <context-param> 
-    <description>Proxy endpoint</description> 
+    <description>Proxy endpoint is the absolute URL where this testing system is installed, plus the servlet mapping of the proxy</description> 
     <param-name>proxy-endpoint</param-name> 
     <param-value>http://localhost:8080/subnot-testing/sparql</param-value> 
   </context-param>

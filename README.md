@@ -4,12 +4,7 @@
 
 This project aims to set up a testing environment to compare subscription and notifications services. 
 
-
-### The subscription and notification services
-
-The subscription and notification services considered are those that allow to the user to subscribe for notificatios on specific changes to triples in an RDF Store. 
-  
-### Metrics
+The Subscription and Notification Services (SNS) considered are those that allow to the user to subscribe for notificatios on specific changes to triples in an RDF Store. 
 
 We are interested in performance test considering the following metrics:
 
@@ -17,30 +12,49 @@ We are interested in performance test considering the following metrics:
 * **Notification response time**: We want to know how quick the Service will notify the user of a given subscription.
 
 
-### Testing System Components
+### Testing System Components  
 
-This testing system considers the following components:
+This thesting system is composed of follwing elements:
 
-* RDF Store (the subject of changes)
-* Subscription and Notification Service, may be composed of:
-  * Server component: to register subscriptions and send notification
-  * RDF Store component : specific implementation of the RDF Store to track its changes
-* Sparql Query Generator : This component will generate activity for the RDF store by sending SPARQL queries
-* Testing System Manager: (this project itself) will orchestrate activitiy between above mentioned components and perform the corresponding measurements.
+* SubscriptiionNotificationService Interface: this will interact with the SNS to perform corresponding subscriptions.
+* SPARQLQuery Proxy: this proxy will monitore queries executed agains the store and measure the response time.
+* SparqlSimulator Interface: this will interact with sparql client simulators, basically to start/stop the simulation
+* Manager: provides the iterface to start and stp the testing
 
-### Testing System Manager  
+### Implementations
 
-* SubscriptiionNotificationService Interface
-* SPARQLQuery Proxy
-* SparqlSimulator Interface
-* Manager
+Currently we have implemented Subscription and Notification Service interfaces for:
 
+* [Rsine](https://github.com/rsine/rsine)
+
+And Sparql Client Simulator:
+
+* Simple SPARQL Client simulator: reads txt files from the system and executes the queries against the Proxy
+* Supply Chain Dashboard: generates messages of product shipping in a supply chain network (not open source).
+
+## Configure
+
+The services URLs as well the triple store endpont URL have to be provided in the `web.xml` file context parameters. 
 
 ## Install
 
-To generate the war file:
+You need first to configure the URL services for the different components in the web.xml file. Then, you can generate the war file using maven:
 
 	mvn package
 
+Install the war file in a servlet container.
+
+These instruction do not include the services to evaluate. You need of course, to perform the corresponding installations of SNS (e.g. [Rsine](https://github.com/rsine/rsine)), triple store and Simulators accordingly. 
+
+
+## Run
+
+The testing system can be run using the following parameters:
+
+
+parameter    | description
+------------ | -------------
+?action=run  | initialise the system by registering subscriptions and starting the simulation  
+?action=stop | stops the simulation and computes statistics
 
 
