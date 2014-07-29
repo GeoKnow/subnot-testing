@@ -1,11 +1,13 @@
  #!/usr/bin/env python
 
 import shlex, subprocess, re, glob, os, time
+import httplib, socket
+
 from os import listdir
 from os.path import getmtime
-from dateutil import parser # from package python-dateutil
-							# [sudo] pip install python-dateutil
-import httplib, socket
+
+# [sudo] pip install python-dateutil
+from dateutil import parser 
 
 global virt_path, virt_log_path, virt_log_name, virt_log_offset
 virt_path = "/opt/virtuoso-opensource-version-develop7/"
@@ -20,10 +22,11 @@ rsine_port = "2221"
 global debug, total_nr_triples, trx_parsed_files, from_beginning, now, sleep
 debug = False
 from_beginning = False
-sleep = 0.5
+sleep = 1
 now = time.time()
 total_nr_triples = 0
 trx_parsed_files = [] # [{String path, int offset, float cmtime}, float mtime ...]
+
 
 def getFilesForPattern(pattern = virt_log_path + "*.trx"):
 	trx_files_list = []
@@ -167,7 +170,7 @@ while True:
 			print "parsing (new file), starting at 0 - " + path 
 			offset = 0
 			new_offset = parse(path, offset)
-			trx_parsed_files.append({'path': path, 'offset': new_offset, 'cmtime': tcmtime})
+			trx_parsed_files.append({'path': path, 'offset': new_offset, 'cmtime': cmtime})
 			if new_offset != trx_parsed_file[0]['offset']:
 				print "new_offset: " + `new_offset`
 
