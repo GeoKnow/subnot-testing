@@ -9,6 +9,10 @@ from os.path import getmtime
 # [sudo] pip install python-dateutil
 from dateutil import parser 
 
+# [sudo] pip install watchdog
+from watchdog.observers import Observer  
+from watchdog.events import PatternMatchingEventHandler  
+
 global virt_path, virt_log_path, virt_log_name, virt_log_offset
 virt_path = "/opt/virtuoso-opensource-version-develop7/"
 virt_log_path = virt_path + "var/lib/virtuoso/db/"
@@ -130,6 +134,38 @@ def parse(file, offset):
 		return 0
 # end parse
 
+class MyHandler(PatternMatchingEventHandler):
+    patterns = ["*.trx"]
+
+    def process(self, event):
+        """
+        event.event_type 
+            'modified' | 'created' | 'moved' | 'deleted'
+        event.is_directory
+            True | False
+        event.src_path
+            virt_log_path
+        """
+        # the file will be processed there
+        print event.src_path, event.event_type  # print now only for degug
+
+        
+
+    def on_modified(self, event):
+        self.process(event)
+
+    def on_created(self, event):
+        self.process(event)
+
+observer = Observer()
+observer.schedule(MyHandler(), virt_log_path)
+observer.start()
+try:
+	while True:
+		time.sleep(sleep)
+except KeyboardInterrupt:
+	observer.stop()
+observer.join()
 
 # Main loop
 loop = 0
