@@ -6,7 +6,9 @@ import httplib, socket
 from os import listdir
 from os.path import getmtime
 from collections import deque
+from optparse import OptionParser
 
+# sudo easy_install pip
 # [sudo] pip install python-dateutil
 from dateutil import parser 
 
@@ -14,14 +16,14 @@ from dateutil import parser
 from watchdog.observers import Observer  
 from watchdog.events import PatternMatchingEventHandler  
 
-global virt_path, virt_log_path, virt_log_name, virt_log_offset
-virt_path = "/opt/virtuoso-opensource-version-develop7/"
+global virt_path, virt_log_path, virt_log_offset
+virt_path = "./"
 virt_log_path = virt_path + "var/lib/virtuoso/db/"
-virt_log_name = "virtuoso20140728082809.trx"
+# virt_log_name = "virtuoso20140728082809.trx"
 virt_log_offset = 0
 
 global rsine_host, rsine_port
-rsine_host = "192.168.33.1"
+rsine_host = "127.0.0.1"
 rsine_port = "2221"
 
 global debug, total_nr_triples, trx_parsed_files, from_beginning, sleep, trx_files_to_parse, last_ex
@@ -166,6 +168,38 @@ def handleFile(path):
 #end handleFile
 
 
+def parse_cmd_line():
+	global virt_path, virt_log_path, rsine_host, rsine_port
+	usage = "usage: python %prog -v <virtuoso_path> -l <virtuoso_trx_log_path> -r <rsine_host> -p <rsine_port>"
+	parser = OptionParser(usage=usage)
+	parser.add_option("-v", "--virtuoso_path", dest="virt_path",
+	                  help="The path to the virtuoso install directory.")
+	parser.add_option("-l", "--virt_log_path", dest="virt_log_path", 
+	                  help="The path where the virtuoso transactions logs are written.")
+	parser.add_option("-r", "--rsine_host", dest="rsine_host", 
+	                  help="The hostname of the server wehre the rsine service is running.")
+	parser.add_option("-p", "--rsine_port", dest="rsine_port", 
+	                  help="The purt the rsine services listens on.")
+	(options, args) = parser.parse_args()
+	
+	if options.rsine_host:
+		rsine_host = options.rsine_host
+		print "rsine_host: " + rsine_host
+
+	if options.rsine_port:
+		rsine_port = options.rsine_port
+		print "rsine_port: " + `rsine_port`
+
+	if options.virt_path:
+		virt_path = options.virt_path
+		print "virt_path: " + virt_path
+
+	if options.virt_log_path:
+		virt_log_path = options.virt_log_path
+		print "virt_log_path: " + virt_log_path
+#end parse_cmd_line
+
+
 class MyHandler(PatternMatchingEventHandler):
 	patterns = ["*.trx"]
 
@@ -190,6 +224,7 @@ class MyHandler(PatternMatchingEventHandler):
 	def on_created(self, event):
 		self.process(event)
 
+parse_cmd_line()
 observer = Observer()
 observer.schedule(MyHandler(), virt_log_path)
 observer.start()
