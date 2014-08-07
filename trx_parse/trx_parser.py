@@ -184,19 +184,19 @@ def parse_cmd_line():
 	
 	if options.rsine_host:
 		rsine_host = options.rsine_host
-		print "rsine_host: " + rsine_host
+	print "rsine_host: " + rsine_host
 
 	if options.rsine_port:
 		rsine_port = options.rsine_port
-		print "rsine_port: " + `rsine_port`
+	print "rsine_port: " + `rsine_port`
 
 	if options.virt_path:
 		virt_path = options.virt_path
-		print "virt_path: " + virt_path
+	print "virt_path: " + virt_path
 
 	if options.virt_log_path:
 		virt_log_path = options.virt_log_path
-		print "virt_log_path: " + virt_log_path
+	print "virt_log_path: " + virt_log_path
 #end parse_cmd_line
 
 
