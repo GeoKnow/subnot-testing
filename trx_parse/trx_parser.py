@@ -93,12 +93,12 @@ def placeRestCall(op, s, p, o):
 			return False
 		last_ex = False
 	except socket.error as ex:
-		if not last_ex or last_ex.errno != ex.errno:
+		if not last_ex or last_ex != ex:
 			print ex
 			print "Error connecting to rsine service."
 		last_ex = ex
 	except httplib.BadStatusLine as ex:
-		if not last_ex or last_ex.errno != ex.errno:
+		if not last_ex or last_ex != ex:
 			print ex
 			print "Lost connection to rsine service."
 		last_ex=ex
@@ -173,13 +173,13 @@ def parse_cmd_line():
 	usage = "usage: python %prog -v <virtuoso_path> -l <virtuoso_trx_log_path> -r <rsine_host> -p <rsine_port>"
 	parser = OptionParser(usage=usage)
 	parser.add_option("-v", "--virtuoso_path", dest="virt_path",
-	                  help="The path to the virtuoso install directory.")
+	                  help="The path to the virtuoso installation directory.")
 	parser.add_option("-l", "--virt_log_path", dest="virt_log_path", 
-	                  help="The path where the virtuoso transactions logs are written.")
+	                  help="The path where virtuoso transaction logs are written.")
 	parser.add_option("-r", "--rsine_host", dest="rsine_host", 
-	                  help="The hostname of the server wehre the rsine service is running.")
+	                  help="The hostname of the server where the rsine service is running.")
 	parser.add_option("-p", "--rsine_port", dest="rsine_port", 
-	                  help="The purt the rsine services listens on.")
+	                  help="The port the rsine services listens on.")
 	(options, args) = parser.parse_args()
 	
 	if options.rsine_host:
