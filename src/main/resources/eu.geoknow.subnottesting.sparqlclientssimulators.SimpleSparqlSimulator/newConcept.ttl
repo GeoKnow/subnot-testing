@@ -22,6 +22,5 @@
     rsine:notifier [
         a rsine:httpNotifier ;
         http:methodName "POST";
-        http:absoluteURI <http://localhost:8080/subnot-testing/notify>;
-        rsine:subscription <http://example.org/newConcept> 
+        http:absoluteURI <http://localhost:8080/subnot-testing/notify> 
     ].

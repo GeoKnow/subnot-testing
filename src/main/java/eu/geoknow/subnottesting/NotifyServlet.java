@@ -54,16 +54,23 @@ public class NotifyServlet extends HttpServlet {
 
     for (String name : requestParameters.keySet()) {
       for (String value : requestParameters.get(name)) {
-
+        String changeset_pattern = "\\[(.*?)\\]";
+        String subscription_pattern = "\\[.*?You receive this notification because of subscription (.*?)\\]";
         if ("messages".equals(name)) {
-
-          Pattern p = Pattern.compile("\\[(.*?)\\]");
+          // get the subscription message
+          Pattern p = Pattern.compile(subscription_pattern);
           Matcher m = p.matcher(value);
           int changes_count = 0;
+          String subscription = "";
+          while (m.find()) {
+            subscription = m.group(1);
+          }
+          // get the changesets
+          p = Pattern.compile(changeset_pattern);
+          m = p.matcher(value);
           while (m.find()) {
             String[] bindings = m.group(1).split(";");
             ChangeSetNotification csnotification = notifications.addChangeSetNotification();
-
             csnotification.setNotificationTimeStamp(notificationTimeStamp);
             changes_count++;
             for (int i = 0; i < bindings.length; i++) {
@@ -93,7 +100,7 @@ public class NotifyServlet extends HttpServlet {
             }
 
           }
-          LOGGER.info(changes_count + " changes");
+          LOGGER.info(subscription + " ==> " + changes_count + " changes");
         }
       }
     }

@@ -44,7 +44,7 @@ public class RsineService implements SubscriptiionNotificationService {
    */
   public int registerSubscriptions(String directory) {
 
-    URL url = getClass().getResource("/");
+    URL url = getClass().getResource(File.separator);
 
     LOGGER.info("Registering subscriptions (ttl|rdf|n3 files) from resources/" + directory);
     File dir = new File(url.getPath() + directory);
@@ -80,7 +80,7 @@ public class RsineService implements SubscriptiionNotificationService {
             client.executeMethod(subscription);
 
             if (subscription.getStatusCode() == 201) {
-              LOGGER.error(subscription.getStatusCode() + " :" + subscription.getStatusText() + " "
+              LOGGER.info(subscription.getStatusCode() + " :" + subscription.getStatusText() + " "
                   + subscription.getPath());
               count++;
             } else

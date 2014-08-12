@@ -1,34 +1,156 @@
 package eu.geoknow.subnottesting.sparqlclientssimulators;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.UUID;
 
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
+import org.openrdf.model.Value;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.TupleQuery;
+import org.openrdf.query.TupleQueryResult;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.http.HTTPRepository;
 
 public class SupplyChainSimulator implements SparqlSimulator {
 
   private static final Logger LOGGER = Logger.getLogger(SupplyChainSimulator.class);
 
-  String hostService;
+  private static String hostService;
+
+  private String namespaces = "@prefix spin: <http://spinrdf.org/sp/> .\n"
+      + "@prefix foaf: <http://xmlns.com/foaf/0.1/> .\n"
+      + "@prefix rsine: <http://lod2.eu/rsine/> .\n"
+      + "@prefix http: <http://www.w3.org/2011/http#> .\n"
+      + "@prefix dcterms: <http://purl.org/dc/terms/>.\n";
+
+  private String notifier = "rsine:notifier [\n" + " a rsine:httpNotifier ;\n"
+      + " http:methodName \"POST\";\n"
+      + " http:absoluteURI <http://localhost:8080/subnot-testing/notify> \n" + " ].";
+
+  // generate a subscription for new order of each supplier replace
+  // REPLACE_UR, IREPLACE_URI with corresponding info
+  private String new_order_supplier = "<http://example.org/new_order/REPLACE_URI> a rsine:Subscription;\n"
+      + " dcterms:description \"new order to REPLACE_NAME Supplier\";\n"
+      + " rsine:query [\n"
+      + " spin:text \"PREFIX cs:<http://purl.org/vocab/changeset/schema#>\n"
+      + " PREFIX spin:<http://spinrdf.org/sp/>\n"
+      + " PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
+      + " PREFIX skos:<http://www.w3.org/2004/02/skos/core#>\n"
+      + " PREFIX sc: <http://www.xybermotive.com/ontology/> \n"
+      + " SELECT * WHERE {\n"
+      + " ?cs a cs:ChangeSet .\n"
+      + " ?cs cs:createdDate ?csdate .\n"
+      + " ?cs cs:addition ?addition .\n"
+      + " ?addition rdf:subject ?concept .\n"
+      + " ?addition rdf:predicate rdf:type .\n"
+      + " ?addition rdf:object sc:Order }\";\n"
+      + " rsine:condition [\n"
+      + " spin:text \"PREFIX sc: <http://www.xybermotive.com/ontology/> \n"
+      + " ASK {\n"
+      + " ?concept sc:connection ?connection . \n"
+      + " ?connection sc:sender ?sender .\n"
+      + " ?sender sc:name ?name .\n"
+      + " FILTER (regex(?name, \'REPLACE_NAME\'))\n"
+      + " }\";\n"
+      + " rsine:expect \"true\"^^xsd:boolean;\n" + " ];\n ];\n";
+
+  private String product_shipped = "<http://example.org/shippings/product/REPLACE_URI> a rsine:Subscription;\n"
+      + " dcterms:description \"REPLACE_NAME\";\n"
+      + " rsine:query [\n"
+      + " spin:text \"PREFIX cs:<http://purl.org/vocab/changeset/schema#>\n"
+      + " PREFIX spin:<http://spinrdf.org/sp/>\n"
+      + " PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
+      + " PREFIX skos:<http://www.w3.org/2004/02/skos/core#>\n"
+      + " PREFIX sc: <http://www.xybermotive.com/ontology/> \n"
+      + " SELECT * WHERE {\n"
+      + " ?cs a cs:ChangeSet .\n"
+      + " ?cs cs:createdDate ?csdate .\n"
+      + " ?cs cs:addition ?addition .\n"
+      + " ?addition rdf:subject ?concept .\n"
+      + " ?addition rdf:predicate rdf:type .\n"
+      + " ?addition rdf:object sc:Shipping\n"
+      + " }\";\n"
+      + " rsine:condition [\n"
+      + " spin:text \"PREFIX sc: <http://www.xybermotive.com/ontology/> \n"
+      + " ASK {\n"
+      + " ?concept sc:connection ?connection . \n"
+      + " ?connection sc:product ?product .\n"
+      + " ?product sc:name ?name .\n"
+      + " FILTER (regex(?name, \'REPLACE_NAME\'))\n"
+      + " }\";\n"
+      + " rsine:expect \"true\"^^xsd:boolean;\n ];\n];\n";
+
+  private String product_arrived_late = "<http://example.org/REPLACE_URI> a rsine:Subscription;\n"
+      + " dcterms:description \"REPLACE_NAME arrived late\";\n" + " rsine:query [\n"
+      + " spin:text \"PREFIX cs:<http://purl.org/vocab/changeset/schema#>\n"
+      + " PREFIX spin:<http://spinrdf.org/sp/>\n"
+      + " PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
+      + " PREFIX skos:<http://www.w3.org/2004/02/skos/core#>\n"
+      + " PREFIX sc: <http://www.xybermotive.com/ontology/> \n" + " SELECT * WHERE {\n"
+      + " ?cs a cs:ChangeSet .\n" + " ?cs cs:createdDate ?csdate .\n"
+      + " ?cs cs:addition ?addition .\n" + " ?addition rdf:subject ?concept .\n"
+      + " ?addition rdf:predicate rdf:type .\n" + " ?addition rdf:object sc:Shipping\n" + " }\";\n"
+      + " rsine:condition [\n"
+      + " spin:text \"PREFIX sc: <http://www.xybermotive.com/ontology/> \n" + " ASK {\n"
+      + " ?concept sc:order ?order .\n" + " ?order sc:dueDate ?dueDate .\n"
+      + " ?concept sc:date ?actualDate .\n" + " ?concept sc:connection ?conn .\n"
+      + " ?conn sc:product ?product . \n" + " ?product sc:name ?name .\n"
+      + " FILTER (regex(?name, \'REPLACE_NAME\'))\n" + " FILTER(?actualDate > ?dueDate)\n"
+      + " }\";\n" + " rsine:expect \"true\"^^xsd:boolean;\n ];\n ];\n";
+
+  private String new_supplier_product = "<http://example.org/REPLACE_URI> a rsine:Subscription;\n"
+      + " dcterms:description \"new supplier of product REPLACE_NAME\";\n" + " rsine:query [\n"
+      + " spin:text \"PREFIX cs:<http://purl.org/vocab/changeset/schema#>\n"
+      + " PREFIX spin:<http://spinrdf.org/sp/>\n"
+      + " PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n"
+      + " PREFIX skos:<http://www.w3.org/2004/02/skos/core#>\n"
+      + " PREFIX sc: <http://www.xybermotive.com/ontology/> \n" + " SELECT * WHERE {\n"
+      + " ?cs a cs:ChangeSet .\n" + " ?cs cs:createdDate ?csdate .\n"
+      + " ?cs cs:addition ?addition .\n" + " ?addition rdf:subject ?concept .\n"
+      + " ?addition rdf:predicate rdf:type .\n" + " ?addition rdf:object sc:Supplier\n" + " }\";\n"
+      + " rsine:condition [\n"
+      + " spin:text \"PREFIX sc: <http://www.xybermotive.com/ontology/> \n" + " ASK {\n"
+      + " ?concept sc:product ?product .\n" + " ?product sc:name ?name .\n"
+      + " FILTER (regex(?name, \'REPLACE_NAME\'))\n" + " }\";\n"
+      + " rsine:expect \"true\"^^xsd:boolean;\n" + " ];\n ];\n \n";
 
   public SupplyChainSimulator(String hostService) throws MalformedURLException {
-
-    this.hostService = hostService;
-
+    SupplyChainSimulator.hostService = hostService;
   }
 
-  public void generateSubsciptionFiles() {
+  /**
+   * TODO: find a better way to do this in the initialization
+   * 
+   * @param args
+   */
 
-    String suppliers_query = " PREFIX sc: <http://www.xybermotive.com/ontology/> select ?s"
-        + " from <subnot-test>  { ?s a sc:Supplier}";
-
+  public static void main(String[] args) {
+    try {
+      SupplyChainSimulator sim = new SupplyChainSimulator("http://localhost:9000");
+      sim.run();
+      sim.generateSubsciptionFiles("http://192.168.2.41:8890/sparql", "subnot-test", sim.getClass()
+          .getName());
+      sim.stop();
+    } catch (MalformedURLException e) {
+      // TODO Auto-generated catch block
+      e.printStackTrace();
+    }
   }
 
+  /**
+   * Initializes the simulator
+   */
   public void run() {
 
-    String uri = this.hostService + "/simulator/run";
+    String uri = SupplyChainSimulator.hostService + "/simulator/run";
 
     HttpClient client = new HttpClient();
     PostMethod method = new PostMethod(uri);
@@ -43,9 +165,12 @@ public class SupplyChainSimulator implements SparqlSimulator {
     LOGGER.info("simulation started");
   }
 
+  /**
+   * Stops the simulator
+   */
   public void stop() {
 
-    String uri = this.hostService + "/simulator/stop";
+    String uri = SupplyChainSimulator.hostService + "/simulator/stop";
     HttpClient client = new HttpClient();
     PostMethod method = new PostMethod(uri);
     try {
@@ -55,5 +180,117 @@ public class SupplyChainSimulator implements SparqlSimulator {
     }
     method.releaseConnection();
     LOGGER.info("simulation stoped");
+  }
+
+  /**
+   * Generates subscription files based on predefined queries
+   * 
+   * @param endpoint
+   * @param graph
+   * @param directory
+   */
+  public void generateSubsciptionFiles(String endpoint, String graph, String directory) {
+
+    URL url = getClass().getResource(File.separator);
+    String dir = url.getPath() + directory;
+
+    Repository myRepository = new HTTPRepository(endpoint, "store");
+
+    try {
+      myRepository.initialize();
+      RepositoryConnection con = myRepository.getConnection();
+
+      String suppliers_query = "PREFIX sc:<http://www.xybermotive.com/ontology/>\n"
+          + "select distinct ?uri ?name FROM <subnot-test> {\n"
+          + "?uri a sc:Supplier . ?uri sc:name ?name }";
+
+      TupleQuery tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, suppliers_query);
+
+      TupleQueryResult result = tupleQuery.evaluate();
+      try {
+        while (result.hasNext()) { // iterate over the result
+          BindingSet bindingSet = result.next();
+          Value uri = bindingSet.getValue("uri");
+          Value name = bindingSet.getValue("name");
+
+          // String uri_base_name =
+          // uri.stringValue().replace("http://www.xybermotive.com/supplier/",
+          // "");
+
+          String uuid = UUID.randomUUID().toString();
+
+          LOGGER.info("Creating file " + dir + File.separator + "new_order_supplier_"
+              + UUID.randomUUID());
+
+          String q = new_order_supplier.replace("REPLACE_URI", "new_order_supplier_" + uuid)
+              .replace("REPLACE_NAME", name.stringValue());
+          FileUtils.writeStringToFile(new File(dir + File.separator + "new_order_supplier_" + uuid
+              + ".ttl"), namespaces + q + notifier);
+        }
+      } finally {
+        result.close();
+      }
+
+      String products_query = "PREFIX sc:<http://www.xybermotive.com/ontology/>\n"
+          + "select distinct ?uri ?name FROM <subnot-test> {\n"
+          + "?uri a sc:Product . ?uri sc:name ?name }";
+
+      tupleQuery = con.prepareTupleQuery(QueryLanguage.SPARQL, products_query);
+
+      result = tupleQuery.evaluate();
+      try {
+        while (result.hasNext()) { // iterate over the result
+          BindingSet bindingSet = result.next();
+          Value uri = bindingSet.getValue("uri");
+          Value name = bindingSet.getValue("name");
+
+          // String uri_base_name =
+          // uri.stringValue().replace("http://www.xybermotive.com/product/",
+          // "");
+          String uuid = UUID.randomUUID().toString();
+
+          LOGGER.info("Creating file " + dir + File.separator + "product_shipped_" + uuid);
+          String q = product_shipped.replace("REPLACE_URI", "product_shipped_" + uuid).replace(
+              "REPLACE_NAME", name.stringValue());
+          FileUtils.writeStringToFile(new File(dir + File.separator + "product_shipped_" + uuid
+              + ".ttl"), namespaces + q + notifier);
+
+          LOGGER.info("Creating file " + dir + File.separator + "product_arrived_late_" + uuid);
+          q = product_arrived_late.replace("REPLACE_URI", "product_arrived_late_" + uuid).replace(
+              "REPLACE_NAME", name.stringValue());
+          FileUtils.writeStringToFile(new File(dir + File.separator + "product_arrived_late_"
+              + uuid + ".ttl"), namespaces + q + notifier);
+
+          LOGGER.info("Creating file " + dir + File.separator + "new_supplier_product_" + uuid);
+          q = new_supplier_product.replace("REPLACE_URI", "new_supplier_product_" + uuid).replace(
+              "REPLACE_NAME", name.stringValue());
+          FileUtils.writeStringToFile(new File(dir + File.separator + "new_supplier_product_"
+              + uuid + ".ttl"), namespaces + q + notifier);
+
+        }
+      } finally {
+        result.close();
+      }
+
+      /*
+       * URI supplierType = con.getValueFactory().createURI(
+       * "http://www.xybermotive.com/ontology/Supplier"); URI productType =
+       * con.getValueFactory().createURI(
+       * "http://www.xybermotive.com/ontology/Product"); URI nameProperty =
+       * con.getValueFactory()
+       * .createURI("http://www.xybermotive.com/ontology/name");
+       * 
+       * RepositoryResult<Statement> suppliers = con.getStatements(null,
+       * RDF.TYPE, supplierType, true);
+       * 
+       * while (suppliers.hasNext()) { Statement st = suppliers.next(); Resource
+       * supplier = st.getSubject(); RepositoryResult<Statement> names =
+       * con.getStatements(supplier, nameProperty, null, true); Statement stn =
+       * names.next(); String name = stn.getObject().stringValue();
+       */
+
+    } catch (Exception e) {
+      LOGGER.error("couldnt create queries", e);
+    }
   }
 }

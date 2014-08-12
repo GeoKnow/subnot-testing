@@ -18,16 +18,14 @@
                 ?addition rdf:object skos:Concept
             }";
         ];
+            
+    rsine:formatter [
+         a rsine:vtlFormatter;
+         rsine:message "There is a new concept '$bindingSet.getValue('concept')'";
+    ] ;
     
     rsine:notifier [
         a rsine:httpNotifier ;
         http:methodName "POST";
-        http:absoluteURI <http://localhost:8080/subnot-testing/notify>;
-        rsine:subscription <http://example.org/newConceptFormatted> 
-    ];
-        
-    rsine:formatter [
-         a rsine:vtlFormatter;
-         rsine:message "There is a new concept '$bindingSet.getValue('concept')'";
-    ] .
-    
+        http:absoluteURI <http://localhost:8080/subnot-testing/notify> 
+    ].
