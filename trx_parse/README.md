@@ -21,7 +21,7 @@ We are interested in performance test considering the following metrics:
 
     pip list | grep -E "watchdog|dateutil"
 
-* install tem if neccessary
+* install if neccessary
 	
 	[sudo] pip install watchdog
 	[sudo] pip install python-dateutil
