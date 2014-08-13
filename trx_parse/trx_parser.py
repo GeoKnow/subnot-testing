@@ -80,7 +80,7 @@ def placeRestCall(op, s, p, o):
 	headers = {"Content-Type": "text/plain", 
 			   "Accept": "text/plain"}
 
-	conn = httplib.HTTPConnection(rsine_host, rsine_port)
+	conn = httplib.HTTPConnection(rsine_host, rsine_port, timeout=5)
 	try:
 		conn.request("POST", "", body, headers)
 		res = conn.getresponse()
