@@ -1,6 +1,3 @@
-trace_on();
-
-
 
 CREATE PROCEDURE elds_read_trx (
 	IN 	file 	ANY	, 
