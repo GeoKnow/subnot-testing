@@ -42,21 +42,29 @@ We are interested in performance test considering the following metrics:
 
 Above command gives usage information:
 
-    Usage: python trx_parser.py -v <virtuoso_path> -l <virtuoso_trx_log_path> -r <rsine_host> -p <rsine_port>
+	Usage: python trx_parser.py -i <virt_isql_path> -l <virt_log_path> -s <virt_server_port> -u <virt_dba_user> -w <virt_dba_passwd> -r <rsine_host> -p <rsine_port>
 
-    Options:
-		  -h, --help            show this help message and exit
-		  -v VIRT_PATH, --virtuoso_path=VIRT_PATH
-		                        The path to virtuoso installation directory.
-		  -l VIRT_LOG_PATH, --virt_log_path=VIRT_LOG_PATH
-		                        The path where virtuoso transaction logs are
-		                        written.
-		  -r RSINE_HOST, --rsine_host=RSINE_HOST
-		                        The hostname of the server where the rsine service is
-		                        running.
-		  -p RSINE_PORT, --rsine_port=RSINE_PORT
-		                        The port the rsine services listens on.
-		                        
+	Options:
+	  -h, --help            show this help message and exit
+	  -i VIRT_ISQL_PATH, --virt_isql_path=VIRT_ISQL_PATH
+	                        The path of the isql executable. Defaults to
+	                        ./bin/isql
+	  -l VIRT_LOG_PATH, --virt_log_path=VIRT_LOG_PATH
+	                        The path where virtuoso transaction logs are written.
+	                        Defaults to ./var/lib/virtuoso/db/
+	  -s VIRT_SERVER_PORT, --virt_server_port=VIRT_SERVER_PORT
+	                        The virtuoso server port. Defaults to 1111
+	  -u VIRT_DBA_USER, --virt_dba_user=VIRT_DBA_USER
+	                        The dba user. Defaults to dba
+	  -w VIRT_DBA_PASSWD, --virt_dba_passwd=VIRT_DBA_PASSWD
+	                        The dba password. Defaults to dba
+	  -r RSINE_HOST, --rsine_host=RSINE_HOST
+	                        The hostname of the server where the rsine service is
+	                        running. Defaults to 127.0.0.1
+	  -p RSINE_PORT, --rsine_port=RSINE_PORT
+	                        The port the rsine services listens on. Defaults to
+	                        2221
+
 ## ToDos
 
 * add option ( -g, --graphs URI[,URI[,...]] ) to limit notifications to a list of graphs
