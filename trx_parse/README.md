@@ -29,8 +29,9 @@ We are interested in performance test considering the following metrics:
 
 ### Prepare Your Virtuoso Instance
 
-* enable CheckpointAuditTrail in the virtuosos.ini file of your database
-    * set CheckpointAuditTrail to a non zero value see [Virtuoso Documentation for details](http://docs.openlinksw.com/virtuoso/backup.html)
+* enable ``CheckpointAuditTrail`` in the virtuosos.ini file of your database
+    * set ``CheckpointAuditTrail`` to a non zero value see [Virtuoso Documentation for details](http://docs.openlinksw.com/virtuoso/backup.html)
+* add the log dir to ``DirsAllowed``so that virtuoso can read the transaction log files
 * install the stored procedure from ``trx_procedures.sql`` (you might need to adapt port, user and password in the isql call according to your environment)
 
     	$ cd <path to Virtuoso>
