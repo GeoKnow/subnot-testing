@@ -46,3 +46,8 @@ Above command gives usage information:
 		                        running.
 		  -p RSINE_PORT, --rsine_port=RSINE_PORT
 		                        The port the rsine services listens on.
+		                        
+## ToDos
+
+* add option ( -g, --graphs URI[,URI[,...]] ) to limit notifications to a list of graphs
+* code refactoring
