@@ -114,35 +114,39 @@ def parse(file, offset):
 	cmdline += " \"EXEC=elds_read_trx('" + file + "', " + `offset` + "); exit;\""
 	args = shlex.split(cmdline)
 
-	output = subprocess.check_output(args)
-	triple_count = 0
-	ok = True
-	for line in output.splitlines():
-		# find "operation g s p o"
-		match = re.search('([DI])\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)', line) 
-		if match:
-			triple_count += 1
-			operation = match.group(1)
-			g = match.group(2)
-			s = match.group(3)
-			p = match.group(4)
-			o = match.group(5)
-			if not placeRestCall(operation, s, p, o):
-				ok = False
+	try:
+		output = subprocess.check_output(args)
+		triple_count = 0
+		ok = True
+		for line in output.splitlines():
+			# find "operation g s p o"
+			match = re.search('([DI])\s+(\S+)\s+(\S+)\s+(\S+)\s+(.*)', line) 
+			if match:
+				triple_count += 1
+				operation = match.group(1)
+				g = match.group(2)
+				s = match.group(3)
+				p = match.group(4)
+				o = match.group(5)
+				if not placeRestCall(operation, s, p, o):
+					ok = False
 
-		# find "offset"
-		match = re.search('(\d+)\s+BLOB.*', line) 
-		if match:
-			new_offset = match.group(1)
-	
-	if triple_count > 0:
-		print "# of send triples: " + `triple_count` + "; all ok: " + `ok`
+			# find "offset"
+			match = re.search('(\d+)\s+BLOB.*', line) 
+			if match:
+				new_offset = match.group(1)
+		
+		if triple_count > 0:
+			print "# of send triples: " + `triple_count` + "; all ok: " + `ok`
+			if ok:
+				total_nr_triples += triple_count
 		if ok:
-			total_nr_triples += triple_count
-	if ok:
-		return new_offset
-	else: 
-		return 0
+			return new_offset
+		else: 
+			return 0
+	except subprocess.CalledProcessError as ex:
+		print ex
+	return 0
 # end parse
 
 
