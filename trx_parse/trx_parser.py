@@ -16,17 +16,16 @@ from dateutil import parser
 from watchdog.observers import Observer  
 from watchdog.events import PatternMatchingEventHandler  
 
-global virt_path, virt_log_path, virt_log_offset
-virt_path = "./"
-virt_log_path = virt_path + "var/lib/virtuoso/db/"
-# virt_log_name = "virtuoso20140728082809.trx"
+virt_isql_path = "./bin/isql"
+virt_log_path = "./var/lib/virtuoso/db/"
+virt_server_port = "1111"
+virt_dba_user = "dba"
+virt_dba_passwd = "dba"
 virt_log_offset = 0
 
-global rsine_host, rsine_port
 rsine_host = "127.0.0.1"
 rsine_port = "2221"
 
-global debug, total_nr_triples, trx_parsed_files, from_beginning, sleep, trx_files_to_parse, last_ex
 debug = False
 sleep = 1
 total_nr_triples = 0
@@ -108,10 +107,11 @@ def placeRestCall(op, s, p, o):
 
 # parses <file> beginning at position <offset>, return last <offset> 
 def parse(file, offset):
-	global total_nr_triples
+	global total_nr_triples, virt_isql_path, virt_server_port, virt_dba_user, virt_dba_passwd
 	new_offset = 0
 	offset = int(float(offset))
-	cmdline = virt_path + "/bin/isql 1111 dba dba \"EXEC=elds_read_trx('" + file + "', " + `offset` + "); exit;\""
+	cmdline = virt_isql_path + " " + virt_server_port + " " + virt_dba_user + " " + virt_dba_passwd 
+	cmdline += " \"EXEC=elds_read_trx('" + file + "', " + `offset` + "); exit;\""
 	args = shlex.split(cmdline)
 
 	output = subprocess.check_output(args)
@@ -169,17 +169,16 @@ def handleFile(path):
 
 
 def parse_cmd_line():
-	global virt_path, virt_log_path, rsine_host, rsine_port
-	usage = "usage: python %prog -v <virtuoso_path> -l <virtuoso_trx_log_path> -r <rsine_host> -p <rsine_port>"
+	global virt_isql_path, virt_log_path, virt_server_port, virt_dba_user, virt_dba_passwd, rsine_host, rsine_port
+	usage = "usage: python %prog -i <virt_isql_path> -l <virt_log_path> -s <virt_server_port> -u <virt_dba_user> -w <virt_dba_passwd> -r <rsine_host> -p <rsine_port>"
 	parser = OptionParser(usage=usage)
-	parser.add_option("-v", "--virtuoso_path", dest="virt_path",
-	                  help="The path to the virtuoso installation directory.")
-	parser.add_option("-l", "--virt_log_path", dest="virt_log_path", 
-	                  help="The path where virtuoso transaction logs are written.")
-	parser.add_option("-r", "--rsine_host", dest="rsine_host", 
-	                  help="The hostname of the server where the rsine service is running.")
-	parser.add_option("-p", "--rsine_port", dest="rsine_port", 
-	                  help="The port the rsine services listens on.")
+	parser.add_option("-i", "--virt_isql_path", 	help="The path of the isql executable. Defaults to ./bin/isql\n")
+	parser.add_option("-l", "--virt_log_path", 		help="The path where virtuoso transaction logs are written. Defaults to ./var/lib/virtuoso/db/\n")
+	parser.add_option("-s", "--virt_server_port", 	help="The virtuoso server port. Defaults to 1111\n")
+	parser.add_option("-u", "--virt_dba_user", 		help="The dba user. Defaults to dba\n")
+	parser.add_option("-w", "--virt_dba_passwd", 	help="The dba password. Defaults to dba\n")
+	parser.add_option("-r", "--rsine_host", 		help="The hostname of the server where the rsine service is running. Defaults to 127.0.0.1\n")
+	parser.add_option("-p", "--rsine_port", 		help="The port the rsine services listens on. Defaults to 2221\n")
 	(options, args) = parser.parse_args()
 	
 	if options.rsine_host:
@@ -190,13 +189,25 @@ def parse_cmd_line():
 		rsine_port = options.rsine_port
 	print "rsine_port: " + `rsine_port`
 
-	if options.virt_path:
-		virt_path = options.virt_path
-	print "virt_path: " + virt_path
+	if options.virt_isql_path:
+		virt_isql_path = options.virt_isql_path
+	print "virt_isql_path: " + virt_isql_path
 
 	if options.virt_log_path:
 		virt_log_path = options.virt_log_path
 	print "virt_log_path: " + virt_log_path
+
+	if options.virt_server_port:
+		virt_server_port = options.virt_server_port
+	print "virt_server_port: " + virt_server_port
+
+	if options.virt_dba_user:
+		virt_dba_user = options.virt_dba_user
+	print "virt_dba_user: " + virt_dba_user
+
+	if options.virt_dba_passwd:
+		virt_dba_passwd = options.virt_dba_passwd
+	print "virt_dba_passwd: " + virt_dba_passwd
 #end parse_cmd_line
 
 
