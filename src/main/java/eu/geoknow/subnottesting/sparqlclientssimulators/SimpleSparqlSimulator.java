@@ -26,83 +26,95 @@ import org.apache.log4j.Logger;
  * 
  */
 
-public class SimpleSparqlSimulator implements SparqlSimulator {
+public class SimpleSparqlSimulator extends SparqlSimulator {
 
-  private static final Logger LOGGER = Logger.getLogger(SimpleSparqlSimulator.class);
+    private static final Logger LOGGER = Logger
+	    .getLogger(SimpleSparqlSimulator.class);
 
-  private URL endpoint;
-  private List<File> sparql_queries;
+    private URL endpoint;
+    private List<File> sparql_queries;
+    private static SimpleSparqlSimulator instance;
 
-  public SimpleSparqlSimulator(String endpoint) throws MalformedURLException {
-    // read the list of files of queries
-    sparql_queries = new ArrayList<File>();
+    public static SimpleSparqlSimulator getInstance(String endpoint)
+	    throws MalformedURLException {
+	if (instance == null)
+	    instance = new SimpleSparqlSimulator(endpoint);
+	return instance;
+    }
 
-    URL url = getClass().getResource("/");
+    public SimpleSparqlSimulator(String endpoint) throws MalformedURLException {
+	// read the list of files of queries
+	sparql_queries = new ArrayList<File>();
 
-    LOGGER.info("Reading queries (txt files) from " + url.getPath()
-        + SimpleSparqlSimulator.class.getName());
-    File dir = new File(url.getPath() + SimpleSparqlSimulator.class.getName());
+	URL url = getClass().getResource("/");
 
-    if (dir.isDirectory()) {
-      for (final File fileEntry : dir.listFiles()) {
-        if (fileEntry.isFile())
-          if (fileEntry.getName().endsWith(".txt"))
-            sparql_queries.add(fileEntry);
-      }
+	LOGGER.info("Reading queries (txt files) from " + url.getPath()
+		+ SimpleSparqlSimulator.class.getName());
+	File dir = new File(url.getPath()
+		+ SimpleSparqlSimulator.class.getName());
 
-    } else
-      LOGGER.error("Not a directory");
+	if (dir.isDirectory()) {
+	    for (final File fileEntry : dir.listFiles()) {
+		if (fileEntry.isFile())
+		    if (fileEntry.getName().endsWith(".txt"))
+			sparql_queries.add(fileEntry);
+	    }
 
-    this.endpoint = new URL(endpoint);
-  }
+	} else
+	    LOGGER.error("Not a directory");
 
-  public void run() {
+	this.endpoint = new URL(endpoint);
+    }
 
-    HttpClient client = new HttpClient();
-    client.getHostConfiguration().setHost(endpoint.getHost());
+    public void run() {
 
-    for (int index = 0; index < sparql_queries.size(); index++) {
+	HttpClient client = new HttpClient();
+	client.getHostConfiguration().setHost(endpoint.getHost());
 
-      LOGGER.info("Posting " + sparql_queries.get(index).getName());
+	for (int index = 0; index < sparql_queries.size(); index++) {
 
-      FileInputStream fis;
-      try {
-        fis = new FileInputStream(sparql_queries.get(index));
+	    LOGGER.info("Posting " + sparql_queries.get(index).getName());
 
-        String query = IOUtils.toString(fis, "UTF-8");
+	    FileInputStream fis;
+	    try {
+		fis = new FileInputStream(sparql_queries.get(index));
 
-        String params = "?query=" + URLEncoder.encode(query, "UTF-8");
-        params += "&format=" + URLEncoder.encode("application/sparql-results+json", "UTF-8");
+		String query = IOUtils.toString(fis, "UTF-8");
 
-        String uri = endpoint.toString() + params;
+		String params = "?query=" + URLEncoder.encode(query, "UTF-8");
+		params += "&format="
+			+ URLEncoder.encode("application/sparql-results+json",
+				"UTF-8");
 
-        LOGGER.debug("MethodGet :" + uri);
+		String uri = endpoint.toString() + params;
 
-        GetMethod method = new GetMethod(uri);
-        client.executeMethod(method);
+		LOGGER.debug("MethodGet :" + uri);
 
-        BufferedReader br = new BufferedReader(new InputStreamReader(method
-            .getResponseBodyAsStream()));
-        String readLine;
-        LOGGER.info("Response status:  " + method.getStatusCode());
-        while (((readLine = br.readLine()) != null)) {
-          LOGGER.debug("  " + readLine);
-        }
-        method.releaseConnection();
+		GetMethod method = new GetMethod(uri);
+		client.executeMethod(method);
 
-      } catch (FileNotFoundException e) {
-        LOGGER.equals(e.getMessage());
-      } catch (HttpException e) {
-        LOGGER.equals(e.getMessage());
-      } catch (IOException e) {
-        LOGGER.equals(e.getMessage());
-      }
+		BufferedReader br = new BufferedReader(new InputStreamReader(
+			method.getResponseBodyAsStream()));
+		String readLine;
+		LOGGER.info("Response status:  " + method.getStatusCode());
+		while (((readLine = br.readLine()) != null)) {
+		    LOGGER.debug("  " + readLine);
+		}
+		method.releaseConnection();
+
+	    } catch (FileNotFoundException e) {
+		LOGGER.equals(e.getMessage());
+	    } catch (HttpException e) {
+		LOGGER.equals(e.getMessage());
+	    } catch (IOException e) {
+		LOGGER.equals(e.getMessage());
+	    }
+
+	}
+    }
+
+    public void stop() {
 
     }
-  }
-
-  public void stop() {
-
-  }
 
 }

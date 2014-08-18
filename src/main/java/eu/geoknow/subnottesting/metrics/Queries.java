@@ -12,59 +12,59 @@ import java.util.List;
  */
 public class Queries {
 
-  private static List<Query> list;
-  private static Queries instance = null;
+    private static List<Query> list;
+    private static Queries instance = null;
 
-  public static Queries getInstance() {
-    if (instance == null) {
-      instance = new Queries();
-      list = new ArrayList<Query>();
-    }
-    return instance;
-  }
-
-  public List<Query> getQueries() {
-    return list;
-  }
-
-  public int getNumberOfQueries() {
-    return list.size();
-  }
-
-  public long getQueryRunTimeAverage() {
-    if (list.isEmpty())
-      return (long) 0;
-    long sum = 0;
-    for (int index = 0; index < list.size(); index++) {
-      sum += list.get(index).getRunTime();
-    }
-    return sum / (long) list.size();
-  }
-
-  public void addQuery(Query query) {
-    list.add(query);
-  }
-
-  public long getQueryMaxDuration() {
-    long max = 0;
-
-    for (int index = 0; index < list.size(); index++) {
-      if (list.get(index).getRunTime() > max)
-        max = list.get(index).getRunTime();
+    public static synchronized Queries getInstance() {
+	if (instance == null) {
+	    instance = new Queries();
+	    list = new ArrayList<Query>();
+	}
+	return instance;
     }
 
-    return max;
-  }
-
-  public long getQueryMinDuration() {
-
-    long min = Long.MAX_VALUE;
-
-    for (int index = 0; index < list.size(); index++) {
-      if (list.get(index).getRunTime() < min)
-        min = list.get(index).getRunTime();
+    public synchronized List<Query> getQueries() {
+	return list;
     }
-    return min;
-  }
+
+    public int getNumberOfQueries() {
+	return list.size();
+    }
+
+    public long getQueryRunTimeAverage() {
+	if (list.isEmpty())
+	    return (long) 0;
+	long sum = 0;
+	for (int index = 0; index < list.size(); index++) {
+	    sum += list.get(index).getRunTime();
+	}
+	return sum / (long) list.size();
+    }
+
+    public void addQuery(Query query) {
+	list.add(query);
+    }
+
+    public long getQueryMaxDuration() {
+	long max = 0;
+
+	for (int index = 0; index < list.size(); index++) {
+	    if (list.get(index).getRunTime() > max)
+		max = list.get(index).getRunTime();
+	}
+
+	return max;
+    }
+
+    public long getQueryMinDuration() {
+
+	long min = Long.MAX_VALUE;
+
+	for (int index = 0; index < list.size(); index++) {
+	    if (list.get(index).getRunTime() < min)
+		min = list.get(index).getRunTime();
+	}
+	return min;
+    }
 
 }

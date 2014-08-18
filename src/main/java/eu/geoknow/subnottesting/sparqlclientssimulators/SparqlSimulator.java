@@ -1,9 +1,8 @@
 package eu.geoknow.subnottesting.sparqlclientssimulators;
 
+public abstract class SparqlSimulator {
 
-public interface SparqlSimulator {
+    public abstract void run();
 
-  public void run();
-
-  public void stop();
+    public abstract void stop();
 }
